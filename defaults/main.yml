@@ -1,0 +1,11 @@
+---
+
+icingabeat_api_host: localhost
+icingabeat_api_port: 5665
+icingabeat_api_user: icinga
+icingabeat_api_password: icinga
+icingabeat_api_ssl_verify: "true" # needs to be a string of "true" or "false"
+icingabeat_elasticsearch_host: localhost
+icingabeat_elasticsearch_port: 9200
+
+...

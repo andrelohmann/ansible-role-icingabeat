@@ -1,0 +1,110 @@
+---
+
+- name: install packages
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - apt-transport-https
+
+- name: Add an Apt signing key, uses whichever key is at the URL
+  apt_key:
+    url: https://packages.icinga.com/icinga.key
+    state: present
+
+- name: Add icinga2 repository
+  apt_repository:
+    repo: deb https://packages.icinga.com/ubuntu icinga-{{ ansible_distribution_release }} main
+    state: present
+    filename: icinga2
+
+- name: install icingabeat
+  apt:
+    name: "{{ packages }}"
+    state: latest
+    dpkg_options: 'force-confnew,force-confdef'
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - icingabeat
+
+- name: set the api icingabeat user password
+  blockinfile:
+    path: /etc/icinga2/conf.d/api-users.conf
+    marker: "### {mark} icingabeat ANSIBLE MANAGED BLOCK ###"
+    block: |
+      object ApiUser "{{ icingabeat_api_user }}" {
+        password = "{{ icingabeat_api_password }}"
+        permissions = ["events/*", "status/query"]
+      }
+
+- name: set the icingabeat host
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    regexp: '^  host: "'
+    line: '  host: "{{ icingabeat_api_host }}"'
+    insertafter: '  # Defines the Icinga API endpoint'
+
+- name: set the icingabeat port
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    regexp: '^  port: '
+    line: '  port: {{ icingabeat_api_port }}'
+    insertafter: '  # Defines the port of the API endpoint'
+
+- name: set the icingabeat password
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    regexp: '^  password: "'
+    line: '  password: "{{ icingabeat_api_password }}"'
+    insertafter: '  # Password of the user'
+
+- name: add elasticsearch host
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    regexp: '^  ssl.verify: '
+    line: '  ssl.verify: {{ icingabeat_api_ssl_verify }}'
+    insertafter: '  # `true`.'
+
+- name: add elasticsearch host
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    regexp: '^  hosts: \['
+    line: '  hosts: ["{{ icingabeat_elasticsearch_host }}:{{ icingabeat_elasticsearch_port }}"]'
+    insertafter: '  # Array of hosts to connect to.'
+
+- name: set kibana ip
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    line: "  host: \"{{ icingabeat_elasticsearch_host }}:5601\""
+    insertafter: '^  #host: "localhost:5601"'
+
+- name: installing the dashboard
+  lineinfile:
+    path: /etc/icingabeat/icingabeat.yml
+    line: "setup.dashboards.enabled: true"
+    insertafter: '^#setup.dashboards.enabled: false'
+
+#setup.dashboards.enabled: false
+
+- name: install icingabeat kibana dashboards
+  shell: icingabeat setup
+  args:
+    executable: /bin/bash
+
+- name: restart icingabeat
+  systemd:
+    name: icingabeat
+    enabled: yes
+    state: restarted
+
+...

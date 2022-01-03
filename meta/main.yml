@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: andrelohmann
+  role_name: icingabeat
+  description: ansible galaxy role to deploy icingabeat
+  company: smartformer UG
+
+  license: MIT
+
+  min_ansible_version: 2.7
+
+  platforms:
+    - name: Ubuntu
+      versions:
+      - bionic
+      - focal
+
+  galaxy_tags:
+  - icingabeat
+
+#dependencies:
+#- andrelohmann.icinga2
+...
