@@ -18,6 +18,6 @@ galaxy_info:
   galaxy_tags:
   - icingabeat
 
-#dependencies:
-#- andrelohmann.icinga2
+dependencies:
+- andrelohmann.icinga2
 ...
