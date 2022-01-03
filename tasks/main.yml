@@ -94,8 +94,6 @@
     line: "setup.dashboards.enabled: true"
     insertafter: '^#setup.dashboards.enabled: false'
 
-#setup.dashboards.enabled: false
-
 - name: install icingabeat kibana dashboards
   shell: icingabeat setup
   args:
