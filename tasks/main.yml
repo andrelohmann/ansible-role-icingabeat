@@ -47,6 +47,11 @@
         permissions = ["events/*", "status/query"]
       }
 
+- name: restart icinga2
+  systemd:
+    name: icinga2
+    state: restarted
+
 - name: set the icingabeat host
   lineinfile:
     path: /etc/icingabeat/icingabeat.yml
